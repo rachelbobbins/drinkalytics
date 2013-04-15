@@ -23,7 +23,7 @@ block content
           div.span3
             h2 #{seoname}
             p
-              a(href="/packets/" + seoname + ".pdf", style="text-decoration: underline") Click to read the election packet.
+              a(href="/packets/" + seoname + ".pdf", style="text-decoration: underline", target="_blank") Click to read the election packet.
             each pos, posname in seo
               div.position
                 h4= posname
