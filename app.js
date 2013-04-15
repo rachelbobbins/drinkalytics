@@ -62,6 +62,133 @@ app.all('/*', function (req, res, next) {
  * Routes
  */
 
+Array.prototype.randomize = function () {
+  this.sort(function (a, b) { return Math.random() - 0.5; })
+  return this;
+};
+
+function getPositions () {
+  return {
+    'CORe': {
+      'President': [
+        {
+          name: 'Larissa Little'
+        }
+      ].randomize(),
+      'Vice President': [
+        {
+          name: 'Dan Kearney'
+        },
+      ].randomize(),
+      'Academic Director': [
+        {
+          name: 'Asa Eckert-Erdheim'
+        }
+      ].randomize(),
+      'Intercollegiate Ambassador': [
+        {
+          name: 'David James Pudlo'
+        }
+      ].randomize(),
+      'Kristoffer Groth': [
+        {
+          name: 'Finance Minister'
+        }
+      ].randomize(),
+    },
+    'SAC': {
+      'Clubs Chair': [
+        {
+          name: 'Trevor Hooton'
+        }
+      ].randomize(),
+      'Activities Chair': [
+        {
+          name: 'Graham Hooton'
+        }
+      ].randomize(),
+    },
+    'SERV': {
+      'Chair': [
+        {
+          name: 'Ariana Chae'
+        }
+      ].randomize(),
+      'Vice-Chair': [
+        {
+          name: 'Daniel Leong'
+        }
+      ].randomize(),
+      'Manager of Finance and Records': [
+        {
+          name: 'Emily Guthrie'
+        },
+        {
+          name: 'Daniel Leong'
+        }
+      ].randomize(),
+      'General Members (Elect 3)': [
+        {
+          name: 'Amanda Sutherland'
+        },
+        {
+          name: 'Michael Searing'
+        },
+        {
+          name: 'Hayley Hansson'
+        },
+        {
+          name: 'Emily Guthrie'
+        }
+      ].randomize(),
+    },
+    'Honor Board': {
+      'Chair': [
+        {
+          name: 'Chris Joyce'
+        },
+        {
+          name: 'Adam Coppola'
+        },
+        {
+          name: 'Alex Kessler'
+        }
+      ].randomize(),
+      'Vice Chair': [
+        {
+          name: 'Chris Joyce'
+        },
+        {
+          name: 'Adam Coppola'
+        },
+        {
+          name: 'Alex Kessler'
+        }
+      ].randomize(),
+      'General Reps': [
+        {
+          name: 'Chris Joyce'
+        },
+        {
+          name: 'Adam Coppola'
+        },
+        {
+          name: 'Alex Kessler'
+        },
+        {
+          name: 'Victoria Preston'
+        },
+        {
+          name: 'Shivam Desai'
+        },
+        {
+          name: 'Elizabeth Doyle'
+        }
+      ].randomize(),
+    }
+  }
+}
+
 app.get('/', function (req, res) {
   db.votes.findOne({
     student: olinapps.user(req).id,
@@ -71,9 +198,11 @@ app.get('/', function (req, res) {
     res.render('index', {
       title: 'Olin Voting App',
       answers: vote ? vote.answers : {},
-      user: olinapps.user(req)
+      positions: getPositions(),
+      user: olinapps.user(req),
+      saved: 'success' in req.query
     });
-  })
+  });
 });
 
 app.post('/', function (req, res) {
@@ -91,9 +220,31 @@ app.post('/', function (req, res) {
   }, function (err, u) {
     console.log('>>>', err, u);
     db.votes.find(function () { console.log(arguments); });
-    res.redirect('/');
+    res.redirect('/?success');
   });
 })
+
+app.get('/SECRETRESULTLINKRAW', function (req, res) {
+  db.votes.find(function (err, votes) {
+    res.json(votes);
+  });
+});
+
+app.get('/SECRETRESULTLINK', function (req, res) {
+  var poshash = {};
+  db.votes.find(function (err, votes) {
+    votes.forEach(function (vote) {
+      Object.keys(vote.answers).forEach(function (pos) {
+        poshash[pos] || (poshash[pos] = {});
+        (Array.isArray(vote.answers[pos]) ? vote.answers[pos] : [vote.answers[pos]]).forEach(function (name) {
+          poshash[pos][name] || (poshash[pos][name] = 0);
+          poshash[pos][name]++;
+        })
+      })
+    });
+    res.json(poshash);
+  });
+});
 
 /*
 app.get('/:id', function (req, res) {

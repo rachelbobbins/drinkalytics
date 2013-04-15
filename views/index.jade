@@ -1,37 +1,35 @@
 extends layout
 
 block content
-  h1 Olin SEO Elections 2013
-  p
-    | Cast your vote below. You can recast it as often as you'd like before 8PM Tuesday, April 16th.
+  style
+    label:hover { background: #ffb; }
+    label { padding: 5px; }
 
-  form(method='post')
-    h2 CORe Elections
-    div
-      each value in ['Bulbasaur', 'Charmander', 'Squirtle']
-        label
-          input(name='vote-core', type='radio', value=value, checked=answers['vote-core']==value)
-          |  #{value}
-      label
-        input(name='vote-core', type='reset', value='Reset')
+  div.header(style="text-align: center")
+    h1 Olin SEO Elections 2013
+    if saved
+      div.alert.alert-success Your vote has been saved! You can recast it as often as you'd like before 8PM Tuesday, April 16th.
+    else
+      p Cast your vote below. You can recast it as often as you'd like before 8PM Tuesday, April 16th.
 
-    h2 SAC Elections
-    div
-      each value in ['Pepsi', 'Coke']
-        label
-          input(name='vote-sac', type='radio', value=value, checked=answers['vote-sac']==value)
-          |  #{value}
-      label
-        input(name='vote-sac', type='reset', value='Reset')
-
-    h2 Honor Board Elections
-    div
-      each value in ['McDonald\'s', 'Burger King']
-        label
-          input(name='vote-hb', type='radio', value=value, checked=answers['vote-hb']==value)
-          |  #{value}
-      label
-        input(name='vote-hb', type='reset', value='Reset')
-
-    div
-      button.btn.btn-success Submit Vote
+  div.container
+    form(method='post')
+      .row
+        each seo, seoname in positions
+          div.span3
+            h2 #{seoname}
+            p
+              a(href="/packets/" + seoname + ".pdf", style="text-decoration: underline") Click to read the election packet.
+            each pos, posname in seo
+              div.position
+                h4
+                  = posname
+                  | 
+                  input(name='vote-' + seoname + '-' + posname, type='reset', value='uncheck', style="vertical-align: bottom; padding: 0 5px; font-size: 10px; line-height: 14px; color: #bbb;").btn.btn-mini
+                each person in pos
+                  label(style=(String(answers['vote-' + seoname + '-' + posname]).indexOf(person.name) > -1 ? "font-style: italic" : ""))
+                    input(name='vote-' + seoname + '-' + posname, type=posname.indexOf('Electing') > -1 ? 'checkbox' : 'radio', value=person.name, checked=String(answers['vote-' + seoname + '-' + posname]).indexOf(person.name) > -1, style="vertical-align: baseline")
+                    |  &nbsp; #{person.name} 
+                  
+            div(style="text-align: center; margin-top: 20px")
+              button.btn.btn-success Save Vote
