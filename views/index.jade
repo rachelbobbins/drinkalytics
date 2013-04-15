@@ -25,16 +25,15 @@ block content
             p
               a(href="/packets/" + seoname + ".pdf", style="text-decoration: underline", target="_blank") Click to read the election packet.
             each pos, posname in seo
-              div.position
+              div.position(style="margin-bottom: 20px")
                 h4= posname
                 each person in pos
                   label(style=(String(answers['vote-' + seoname + '-' + posname]).indexOf(person.name) > -1 ? "font-style: italic" : ""))
-                    input(name='vote-' + seoname + '-' + posname, type=posname.indexOf('elect') > -1 ? 'checkbox' : 'radio', value=person.name, checked=String(answers['vote-' + seoname + '-' + posname]).indexOf(person.name) > -1, style="vertical-align: baseline")
+                    input(name='vote-' + seoname + '-' + posname, type='checkbox', value=person.name, checked=String(answers['vote-' + seoname + '-' + posname]).indexOf(person.name) > -1, style="vertical-align: baseline")
                     |  &nbsp; #{person.name}
-                input.uncheck(name='vote-' + seoname + '-' + posname, type='reset', value='uncheck all', style="vertical-align: bottom; padding: 0 5px; font-size: 10px; line-height: 14px; margin-bottom: 5px").btn.btn-mini
 
-            p(style="margin-top: 10px")
-              small(style="font-size: 10px; color: #999;") When finished, scroll down and click "cast your vote".
+            p(style="margin-top: 10px; line-height: 14px")
+              small(style="font-size: 10px; color: #999") When finished, scroll down and click "cast your vote".
                   
       div(style="text-align: center; margin-top: 20px")
         label(style="width: 400px; margin: 0 auto 10px")
