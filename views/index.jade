@@ -1,32 +1,37 @@
 extends layout
 
 block content
-  h1= title
-  form.form-horizontal(action='/quotes', method='post')
-    .control-group
-      label.control-label(for='quote') Quotation:
-      .controls
-        textarea(id='quote', name='quote', rows=6) "Text"
-    .control-group
-      label.control-label(for='names') People / context:
-      .controls
-        | &mdash; 
-        input(id='names', name='name', type='text', placeholder='People or setting')
-    .control-group
-      .controls
-        button.btn-success.btn(type='submit') Post
+  h1 Olin SEO Elections 2013
+  p
+    | Cast your vote below. You can recast it as often as you'd like before 8PM Tuesday, April 16th.
 
-  h2 Quote board
-  ul(id='quotes')
-    for quote in quotes
-      li
-        blockquote
-          p #{quote.quote}
-          em
-            cite &mdash; #{quote.name}
-        form(action="/delete", method="post")
-          small
-            | Submitted by #{quote.submitter}  
-            if quote.submitter == user.username
-              button.btn.btn-mini(type="submit", name="id", value=quote._id, style="padding: 0 5px", onclick="return confirm('Are you sure you want to purge this quote from history?')")
-                | &times;
+  form(method='post')
+    h2 CORe Elections
+    div
+      each value in ['Bulbasaur', 'Charmander', 'Squirtle']
+        label
+          input(name='vote-core', type='radio', value=value, checked=answers['vote-core']==value)
+          |  #{value}
+      label
+        input(name='vote-core', type='reset', value='Reset')
+
+    h2 SAC Elections
+    div
+      each value in ['Pepsi', 'Coke']
+        label
+          input(name='vote-sac', type='radio', value=value, checked=answers['vote-sac']==value)
+          |  #{value}
+      label
+        input(name='vote-sac', type='reset', value='Reset')
+
+    h2 Honor Board Elections
+    div
+      each value in ['McDonald\'s', 'Burger King']
+        label
+          input(name='vote-hb', type='radio', value=value, checked=answers['vote-hb']==value)
+          |  #{value}
+      label
+        input(name='vote-hb', type='reset', value='Reset')
+
+    div
+      button.btn.btn-success Submit Vote

@@ -13,7 +13,7 @@ var express = require('express')
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'olinapps-voting', ['elections']);
+  db = mongojs(process.env.MONGOLAB_URI || 'olinapps-voting', ['votes']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -62,34 +62,40 @@ app.all('/*', function (req, res, next) {
  * Routes
  */
 
-/*
 app.get('/', function (req, res) {
-  db.elections.find({
-    published: true
-  }).sort({date: -1}, function (err, docs) {
-    console.log(docs);
+  db.votes.findOne({
+    student: olinapps.user(req).id,
+    year: 2013
+  }, function (err, vote) {
+    console.log(err, vote);
     res.render('index', {
       title: 'Olin Voting App',
-      quotes: docs,
+      answers: vote ? vote.answers : {},
       user: olinapps.user(req)
     });
   })
 });
 
 app.post('/', function (req, res) {
-  if (req.body.name && req.body.quote) {
-    db.elections.save({
-      name: req.body.name,
-      quote: req.body.quote,
-      submitter: olinapps.user(req).username,
+  console.log(req.body);
+  db.votes.update({
+    student: olinapps.user(req).id,
+    year: 2013
+  }, {
+    $set: {
       date: Date.now(),
-      published: true
-    }, res.redirect.bind(res, '/'));
-  } else {
-    res.json({error: true, message: 'Invalid quote'}, 500);
-  }
+      answers: req.body
+    }
+  }, {
+    upsert: true
+  }, function (err, u) {
+    console.log('>>>', err, u);
+    db.votes.find(function () { console.log(arguments); });
+    res.redirect('/');
+  });
 })
 
+/*
 app.get('/:id', function (req, res) {
   db.elections.find({
     published: true

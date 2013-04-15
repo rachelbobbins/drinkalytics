@@ -16,15 +16,32 @@
       #quotes li small:hover { color: black; }
     </style>
   <body>
-    <h1>Olin Elections</h1>
+    <h1>Olin Elections 2013</h1>
 
-    <h2>CORe Elections</h2>
-    <p></p>
+    <form>
+      <h2>CORe Elections</h2>
+      <div>
+        <label><input name="vote-core" type="radio" value="Bulbasaur"> Bulbasaur</input></label>
+        <label><input name="vote-core" type="radio" value="Charmander"> Charmander</input></label>
+        <label><input name="vote-core" type="radio" value="Squirtle"> Squirtle</input></label>
+        <label><input name="vote-core" type="reset" value="Reset"></label>
+      </div>
 
-    <h2>SAC Elections</h2>
-    <p></p>
-    
-    <h2>Honor Board Elections</h2>
-    <p></p>
+      <h2>SAC Elections</h2>
+      <div>
+        <label><input name="vote-sac" type="radio" value="Pepsi"> Pepsi</input></label>
+        <label><input name="vote-sac" type="radio" value="Coke"> Coke</input></label>
+        <label><input name="vote-sac" type="reset" value="Reset"></label>
+      </div>
+      
+      <h2>Honor Board Elections</h2>
+      <div>
+        <label><input name="vote-hb" type="radio" value="McDonald's"> McDonald's</input></label>
+        <label><input name="vote-hb" type="radio" value="Burger King"> Burger King</input></label>
+        <label><input name="vote-hb" type="reset" value="Reset"></label>
+      </div>
+
+      <div><button class="btn btn-success">Submit</button></div>
+    </form>
   </body>
 </html>
