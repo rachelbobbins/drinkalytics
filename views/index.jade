@@ -3,14 +3,18 @@ extends layout
 block content
   style
     label:hover { background: #ffb; }
-    label { padding: 5px; }
+    label { padding: 3px; margin: 2px; background: #eee; }
+    .uncheck { color: #bbb; } .uncheck:hover { color: #000; }
 
-  div.header(style="text-align: center")
+  div.header(style="text-align: center; max-width: 800px; margin: 15px auto; border: 1px solid #ccc; background: #eee; padding: 10px 15px; border-radius: 10px")
     h1 Olin SEO Elections 2013
-    if saved
-      div.alert.alert-success Your vote has been saved! You can recast it as often as you'd like before 8PM Tuesday, April 16th.
-    else
-      p Cast your vote below. You can recast it as often as you'd like before 8PM Tuesday, April 16th.
+    p(style="font-size: 16px") For each position, vote for any and all candidate(s) you feel would <b>excel</b> in that office. The candidate(s) with the highest tally are elected. Any candidate must receive at least 15% of the vote in order to take office.
+    p All Olin students who are planning on being campus the following semester are eligible to vote in any Student Experience Organization election.
+
+  if saved
+    div.alert.alert-success(style="text-align: center") Your vote has been saved! You can recast it as often as you'd like before 8PM Tuesday, April 16th.
+  else
+    p(style="text-align: center") Cast your vote below. You can recast it as often as you'd like before 8PM Tuesday, April 16th.
 
   div.container
     form(method='post')
@@ -22,14 +26,20 @@ block content
               a(href="/packets/" + seoname + ".pdf", style="text-decoration: underline") Click to read the election packet.
             each pos, posname in seo
               div.position
-                h4
-                  = posname
-                  | 
-                  input(name='vote-' + seoname + '-' + posname, type='reset', value='uncheck', style="vertical-align: bottom; padding: 0 5px; font-size: 10px; line-height: 14px; color: #bbb;").btn.btn-mini
+                h4= posname
                 each person in pos
                   label(style=(String(answers['vote-' + seoname + '-' + posname]).indexOf(person.name) > -1 ? "font-style: italic" : ""))
-                    input(name='vote-' + seoname + '-' + posname, type=posname.indexOf('Electing') > -1 ? 'checkbox' : 'radio', value=person.name, checked=String(answers['vote-' + seoname + '-' + posname]).indexOf(person.name) > -1, style="vertical-align: baseline")
-                    |  &nbsp; #{person.name} 
+                    input(name='vote-' + seoname + '-' + posname, type=posname.indexOf('elect') > -1 ? 'checkbox' : 'radio', value=person.name, checked=String(answers['vote-' + seoname + '-' + posname]).indexOf(person.name) > -1, style="vertical-align: baseline")
+                    |  &nbsp; #{person.name}
+                input.uncheck(name='vote-' + seoname + '-' + posname, type='reset', value='uncheck all', style="vertical-align: bottom; padding: 0 5px; font-size: 10px; line-height: 14px; margin-bottom: 5px").btn.btn-mini
+
+            p(style="margin-top: 10px")
+              small(style="font-size: 10px; color: #999;") When finished, scroll down and click "cast your vote".
                   
-            div(style="text-align: center; margin-top: 20px")
-              button.btn.btn-success Save Vote
+      div(style="text-align: center; margin-top: 20px")
+        label(style="width: 400px; margin: 0 auto 10px")
+          input.informed(type="checkbox", style="vertical-align: top", onclick="console.log($(this)); $(this).closest('div').find('button').prop('disabled', !this.checked)")
+          |  &nbsp;I'm an informed voter
+        button.btn.btn-success.btn-large.btn-primary(style="font-size: 30px; padding: 15px 30px", disabled) Cast Your Vote
+
+    br

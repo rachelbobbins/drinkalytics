@@ -90,9 +90,9 @@ function getPositions () {
           name: 'David James Pudlo'
         }
       ].randomize(),
-      'Kristoffer Groth': [
+      'SEO Finance Minister': [
         {
-          name: 'Finance Minister'
+          name: 'Kristoffer Groth'
         }
       ].randomize(),
     },
@@ -127,7 +127,7 @@ function getPositions () {
           name: 'Daniel Leong'
         }
       ].randomize(),
-      'General Members (Elect 3)': [
+      'General Members (3 elected now, 2 fall)': [
         {
           name: 'Amanda Sutherland'
         },
@@ -165,7 +165,7 @@ function getPositions () {
           name: 'Alex Kessler'
         }
       ].randomize(),
-      'General Reps': [
+      'General Reps (4 elected now, 2 fall)': [
         {
           name: 'Chris Joyce'
         },
