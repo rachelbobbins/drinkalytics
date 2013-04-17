@@ -10,6 +10,11 @@ block content
     h1 Olin SEO Elections 2013
     p(style="font-size: 16px") For each position, vote for any and all candidate(s) you feel would <b>excel</b> in that office. The candidate(s) with the highest tally are elected. Any candidate must receive at least 15% of the vote in order to take office.
     p All Olin students who are planning on being campus the following semester are eligible to vote in any Student Experience Organization election.
+    p(style="font-style: italic") 
+      | You are logged in as 
+      b
+        = user.id
+      | .
 
   if saved
     div.alert.alert-success(style="text-align: center") Your vote has been saved! You can recast it as often as you'd like before 10PM Wednesday, April 17th.
