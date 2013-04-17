@@ -14,7 +14,9 @@ block content
       | You are logged in as 
       b
         = user.id
-      | .
+      | . 
+      a(href="/logout/")
+        | Logout?
 
   if saved
     div.alert.alert-success(style="text-align: center") Your vote has been saved! You can recast it as often as you'd like before 10PM Wednesday, April 17th.
