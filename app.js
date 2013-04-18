@@ -81,16 +81,9 @@ app.get('/', function (req, res) {
 app.post('/drinks/liquor', function (req, res) {
   console.log(req.body);
   var inc = parseInt(req.body.inc) || 0;
-  var query = {
+  db.stats.update({
     student: olinapps.user(req).id,
-  };
-  // Only decrement to 0
-  if (inc < 0) {
-    query.$min = {
-      liquor: 0
-    };
-  }
-  db.stats.update(query, {
+  }, {
     $inc: {
       liquor: inc
     }
