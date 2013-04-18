@@ -13,7 +13,7 @@ var express = require('express')
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'olinapps-voting', ['votes']);
+  db = mongojs(process.env.MONGOLAB_URI || 'drinkalytics', ['stats']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -26,7 +26,7 @@ app.configure(function () {
   app.use(express.session({
     secret: app.get('secret'),
     store: new MongoStore({
-      url: process.env.MONGOLAB_URI || 'mongodb://localhost/olinapps-voting'
+      url: process.env.MONGOLAB_URI || 'mongodb://localhost/drinkalytics'
     })
   }));
   app.use(app.router);
@@ -39,7 +39,7 @@ app.configure('development', function () {
 });
 
 app.configure('production', function () {
-  app.set('host', 'voting.olinapps.com');
+  app.set('host', 'drinkalytics.herokuapps.com');
 });
 
 /**
@@ -53,7 +53,7 @@ app.all('/*', olinapps.loginRequired);
 
 app.all('/*', function (req, res, next) {
   if (olinapps.user(req).domain != 'students.olin.edu') {
-    return res.send('<h1>Students only.</h1> <p>Sorry, this application is closed to non-students. Please apply for next candidates\' weekend!</p>');
+    return res.send('<h1>Seniors only.</h1> <p>Sorry, this application is closed to non-seniors. Please apply for next candidates\' weekend!</p>');
   }
   next();
 })
@@ -62,223 +62,45 @@ app.all('/*', function (req, res, next) {
  * Routes
  */
 
-Array.prototype.randomize = function () {
-  this.sort(function (a, b) { return Math.random() - 0.5; })
-  return this;
-};
-
-function getPositions () {
-  return {
-    'CORe': {
-      'President': [
-        {
-          name: 'Larissa Little'
-        }
-      ].randomize(),
-      'Vice President': [
-        {
-          name: 'Dan Kearney'
-        },
-      ].randomize(),
-      'Academic Director': [
-        {
-          name: 'Asa Eckert-Erdheim'
-        }
-      ].randomize(),
-      'Intercollegiate Ambassador': [
-        {
-          name: 'David James Pudlo'
-        }
-      ].randomize(),
-      'SEO Finance Minister': [
-        {
-          name: 'Kristoffer Groth'
-        }
-      ].randomize(),
-    },
-    'SAC': {
-      'Clubs Chair': [
-        {
-          name: 'Trevor Hooton'
-        }
-      ].randomize(),
-      'Activities Chair': [
-        {
-          name: 'Graham Hooton'
-        }
-      ].randomize(),
-    },
-    'SERV': {
-      'Chair': [
-        {
-          name: 'Ariana Chae'
-        }
-      ].randomize(),
-      'Vice-Chair': [
-        {
-          name: 'Daniel Leong'
-        }
-      ].randomize(),
-      'Manager of Finance and Records': [
-        {
-          name: 'Emily Guthrie'
-        },
-        {
-          name: 'Daniel Leong'
-        }
-      ].randomize(),
-      'General Members (3 elected now, 2 fall)': [
-        {
-          name: 'Amanda Sutherland'
-        },
-        {
-          name: 'Michael Searing'
-        },
-        {
-          name: 'Hayley Hansson'
-        },
-        {
-          name: 'Emily Guthrie'
-        }
-      ].randomize(),
-    },
-    'Honor Board': {
-      'Chair': [
-        {
-          name: 'Chris Joyce'
-        },
-        {
-          name: 'Adam Coppola'
-        },
-        {
-          name: 'Alex Kessler'
-        }
-      ].randomize(),
-      'Vice Chair': [
-        {
-          name: 'Chris Joyce'
-        },
-        {
-          name: 'Adam Coppola'
-        },
-        {
-          name: 'Alex Kessler'
-        }
-      ].randomize(),
-      'General Reps (4 elected now, 2 fall)': [
-        {
-          name: 'Chris Joyce'
-        },
-        {
-          name: 'Adam Coppola'
-        },
-        {
-          name: 'Alex Kessler'
-        },
-        {
-          name: 'Victoria Preston'
-        },
-        {
-          name: 'Shivam Desai'
-        },
-        {
-          name: 'Elizabeth Doyle'
-        }
-      ].randomize(),
-    }
-  }
-}
-
 app.get('/', function (req, res) {
-  db.votes.findOne({
-    student: olinapps.user(req).id,
-    year: 2013
-  }, function (err, vote) {
-    console.log(err, vote);
+  db.stats.find(function (err, stats) {
+    console.log(err, stats);
     res.render('index', {
-      title: 'Olin Voting App',
-      answers: vote ? vote.answers : {},
-      positions: getPositions(),
-      user: olinapps.user(req),
-      saved: 'success' in req.query
+      title: 'Drinkalytics',
+      stats: stats.sort(function (a, b) {
+        return b.liquor - a.liquor;
+      }),
+      totals: stats.reduce(function (last, next) {
+        last.liquor += next.liquor;
+        return last;
+      }, {liquor: 0})
     });
   });
 });
 
-app.post('/', function (req, res) {
+app.post('/drinks/liquor', function (req, res) {
   console.log(req.body);
-  db.votes.update({
+  var inc = parseInt(req.body.inc) || 0;
+  var query = {
     student: olinapps.user(req).id,
-    year: 2013
-  }, {
-    $set: {
-      date: Date.now(),
-      answers: req.body
+  };
+  // Only decrement to 0
+  if (inc < 0) {
+    query.$min = {
+      liquor: 0
+    };
+  }
+  db.stats.update(query, {
+    $inc: {
+      liquor: inc
     }
   }, {
     upsert: true
   }, function (err, u) {
     console.log('>>>', err, u);
-    db.votes.find(function () { console.log(arguments); });
-    res.redirect('/?success');
-  });
-})
-
-app.get('/SECRETRESULTLINKRAW', function (req, res) {
-  db.votes.find(function (err, votes) {
-    res.json(votes);
-  });
-});
-
-app.get('/SECRETRESULTLINK', function (req, res) {
-  var poshash = {};
-  db.votes.find(function (err, votes) {
-    votes.forEach(function (vote) {
-      Object.keys(vote.answers).forEach(function (pos) {
-        poshash[pos] || (poshash[pos] = {});
-        (Array.isArray(vote.answers[pos]) ? vote.answers[pos] : [vote.answers[pos]]).forEach(function (name) {
-          poshash[pos][name] || (poshash[pos][name] = 0);
-          poshash[pos][name]++;
-        })
-      })
-    });
-    res.json(poshash);
-  });
-});
-
-/*
-app.get('/:id', function (req, res) {
-  db.elections.find({
-    published: true
-  }).sort({date: -1}, function (err, docs) {
-    console.log(docs);
-    res.render('index', {
-      title: 'Olin Voting App',
-      quotes: docs,
-      user: olinapps.user(req)
-    });
-  })
-});
-
-app.del('/:id', function (req, res) {
-  db.elections.update({
-    _id: db.ObjectId(req.body.id),
-    submitter: olinapps.user(req).username
-  }, {
-    $set: {
-      published: false
-    }
-  }, function () {
     res.redirect('/');
-  })
-})
-
-app.get('/names', function (req, res) {
-  db.elections.distinct('name', function (err, names) {
-    res.json(names);
   });
 })
-*/
 
 /**
  * Launch
