@@ -13,7 +13,7 @@ var express = require('express')
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'drinkalytics', ['stats']);
+  db = mongojs(process.env.MONGOLAB_URI || 'drinkalytics', ['drinks', 'stats']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -53,7 +53,7 @@ app.all('/*', olinapps.loginRequired);
 
 app.all('/*', function (req, res, next) {
   if (olinapps.user(req).domain != 'students.olin.edu') {
-    return res.send('<h1>Seniors only.</h1> <p>Sorry, this application is closed to non-seniors. Please apply for next candidates\' weekend!</p>');
+    return res.send('<h1>2013 only.</h1> <p>Sorry, this application is closed to non-students. Please apply for next candidates\' weekend!</p>');
   }
   next();
 })
@@ -78,17 +78,46 @@ app.get('/', function (req, res) {
   });
 });
 
+/*
+
+/api/totals
+/api/drinks/ => list of drink objects ?user=timothy.ryan
+ => type {vodka, beer}, timestamp, details {char* desc}
+/api/users/
+/api/users/timothy.ryan => rank, count, drinks
+
+
+*/
+
+app.get('/api/drinks', function (req, res) {
+  db.drinks.find(function (err, drinks) {
+    res.json(drinks.map(function (d) {
+      delete d._id;
+      return d;
+    }));
+  });
+});
+
+app.get('/api/rank', function (req, res) {
+  db.drinks.find(function (err, drinks) {
+    res.json(drinks.map(function (d) {
+      delete d._id;
+      return d;
+    }));
+  });
+});
+
+app.get('/api/users', function (req, res) {
+  db.drinks.distinct('student', function (err, users) {
+    res.json(users);
+  });
+});
+
 app.post('/drinks/liquor', function (req, res) {
-  console.log(req.body);
-  var inc = parseInt(req.body.inc) || 0;
-  db.stats.update({
+  db.drinks.save({
     student: olinapps.user(req).id,
-  }, {
-    $inc: {
-      liquor: inc
-    }
-  }, {
-    upsert: true
+    drink: 'vodka',
+    date: Date.now()
   }, function (err, u) {
     console.log('>>>', err, u);
     res.redirect('/');
