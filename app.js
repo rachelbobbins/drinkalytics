@@ -119,7 +119,10 @@ app.post('/api/drinks', function (req, res) {
     date: Date.now()
   }, function (err, u) {
     console.log('>>>', err, u);
-    res.redirect('/');
+    res.json({
+      error: err,
+      drink: u
+    })
   });
 })
 
