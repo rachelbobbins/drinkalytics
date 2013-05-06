@@ -13,7 +13,7 @@ var express = require('express')
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'drinkalytics', ['drinks', 'stats']);
+  db = mongojs(process.env.MONGOLAB_URI || 'drinkalytics', ['stats']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -62,35 +62,49 @@ app.all('/*', function (req, res, next) {
  * Routes
  */
 
+function getRankings (next) {
+  db.stats.find(function (err, drinks) {
+    var list = {};
+    (drinks || []).forEach(function (drink) {
+      list[drink.student] || (list[drink.student] = 0);
+      list[drink.student]++;
+    });
+    var rank = Object.keys(list).sort(function (a, b) {
+      return list[b] - list[a];
+    }).map(function (a, i) {
+      return {
+        id: a,
+        drinks: list[a],
+        rank: i + 1
+      };
+    })
+    next(err, rank);
+  });
+}
+
 app.get('/', function (req, res) {
-  db.stats.find(function (err, stats) {
-    console.log(err, stats);
+  getRankings(function (err, stats) {
     res.render('index', {
       title: 'Drinkalytics',
-      stats: stats.sort(function (a, b) {
-        return b.liquor - a.liquor;
-      }),
+      stats: stats,
       totals: stats.reduce(function (last, next) {
-        last.liquor += next.liquor;
+        last.drinks += next.drinks;
         return last;
-      }, {liquor: 0})
+      }, {drinks: 0})
     });
   });
 });
 
-/*
-
-/api/totals
-/api/drinks/ => list of drink objects ?user=timothy.ryan
- => type {vodka, beer}, timestamp, details {char* desc}
-/api/users/
-/api/users/timothy.ryan => rank, count, drinks
-
-
-*/
+app.get('/api', function (req, res) {
+  res.render('api', {
+    title: 'API Reference'
+  });
+})
 
 app.get('/api/drinks', function (req, res) {
-  db.drinks.find(function (err, drinks) {
+  db.stats.find('student' in req.query ? {
+    student: req.query.student
+  } : {}, function (err, drinks) {
     res.json(drinks.map(function (d) {
       delete d._id;
       return d;
@@ -98,31 +112,32 @@ app.get('/api/drinks', function (req, res) {
   });
 });
 
-app.get('/api/rank', function (req, res) {
-  db.drinks.find(function (err, drinks) {
-    res.json(drinks.map(function (d) {
-      delete d._id;
-      return d;
-    }));
-  });
-});
-
-app.get('/api/users', function (req, res) {
-  db.drinks.distinct('student', function (err, users) {
-    res.json(users);
-  });
-});
-
-app.post('/drinks/liquor', function (req, res) {
-  db.drinks.save({
+app.post('/api/drinks', function (req, res) {
+  db.stats.save({
     student: olinapps.user(req).id,
-    drink: 'vodka',
+    drink: req.body.drink || 'Vodka',
     date: Date.now()
   }, function (err, u) {
     console.log('>>>', err, u);
     res.redirect('/');
   });
 })
+
+app.get('/api/rankings', function (req, res) {
+  getRankings(function (err, rank) {
+    res.json(rank);
+  });
+});
+
+app.get('/api/users', function (req, res) {
+  getRankings(function (err, rank) {
+    var list = {};
+    rank.forEach(function (a) {
+      list[a.id] = a;
+    })
+    res.json(list);
+  });
+});
 
 /**
  * Launch

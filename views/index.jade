@@ -1,24 +1,23 @@
 extends layout
 
 block content
-  h1 <s>It's drinkalytics time.</s>
-  h1
-    big ITS NOT YET DRINKALYTICS TIME ITS CURRENTLY IN BETA
+  h1 Drinkalytics
 
-  form(action="/drinks/liquor", method="post")
-    button.btn.btn-success Drink! +1
+  form(action="/api/drinks", method="post")
+    select(name="drink")
+      option(checked, value="Vodka") Vodka
     |  
-    // button.btn.btn-danger(name="inc", value="-1") -1
+    button.btn.btn-success Drink! +1
 
   p
     b Totals:
     blockquote
       p Liquor: 
-        = totals.liquor
+        = totals.drinks
         |  drinks
         b  / 2013
 
-  table.table.table-bordered(style="width: 400px")
+  table.table.table-bordered(style="width: 100%")
     thead
       tr
         th Name
@@ -26,5 +25,5 @@ block content
     tbody
       each stat in stats
         tr
-          td= stat.student
-          td= stat.liquor
+          td= stat.id
+          td= stat.drinks

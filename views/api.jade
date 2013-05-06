@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  h1 Drinkalytics API Reference
+
+  p
+    code GET /api/drinks
+    |  &mdash; a list of drinks
+  p
+    code GET /api/drinks?student=rachel.bobbins
+    |  &mdash; a list of drinks by a student
+  p
+    code POST /api/drinks
+    |  &mdash; body includes fields <b>"drink"</b> for what type of drink ("vodka", etc.)
+
+  p
+    code POST /api/users
+    |  &mdash; a dictionary of users and their drink count
+
+  p
+    code POST /api/rankings
+    |  &mdash; an array of rankings, in order
