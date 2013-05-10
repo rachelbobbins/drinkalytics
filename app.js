@@ -116,6 +116,8 @@ app.post('/api/drinks', function (req, res) {
   db.stats.save({
     student: olinapps.user(req).id,
     drink: req.body.drink || 'Vodka',
+    details: req.body.details || '',
+    servings: req.body.servings,
     date: Date.now()
   }, function (err, u) {
     console.log('>>>', err, u);
